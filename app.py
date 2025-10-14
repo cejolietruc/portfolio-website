@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import smtplib, os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 my_email = os.environ['MY_EMAIL']
 my_pass = os.environ['MY_PASS']
@@ -19,16 +21,24 @@ def home():
             flash("No message has been sent!")
             return redirect(url_for('home'))
 
+        mail = Mail(
+            from_email=my_email,
+            to_emails=to_email,
+            subject='Message from Portfolio Website!',
+            html_content=f'<strong>Name : {name}</strong><br>'
+                         f'<strong>Name : {email}</strong><br>'
+                         f'<p>Name : {message}</p><br>'
+        )
         try:
-            with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
-                connection.starttls()  # Transport Layer Security
-                connection.login(user=my_email, password=my_pass)
-                connection.sendmail(from_addr=my_email,
-                                    to_addrs=to_email,
-                                    msg=f"Subject:Message from Portfolio Website!\n\n"
-                                        f"Name : {name}\n"
-                                        f"Email: {email}\n\n"
-                                        f"{message}")
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            sg.set_sendgrid_data_residency("eu")
+            # uncomment the above line if you are sending mail using a regional EU subuser
+            response = sg.send(mail)
+            print(response.status_c)
+            print(response.body)
+            print(response.headers)
+        except Exception as e:
+            print(e.message)
         except ConnectionError as msg:
             flash(f"{msg}. Try again later!")
         else:
