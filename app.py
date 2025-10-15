@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import smtplib, os
+import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -30,20 +30,20 @@ def home():
                          f'<p>Name : {message}</p><br>'
         )
         try:
-            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-            sg.set_sendgrid_data_residency("eu")
+            sg = SendGridAPIClient(os.environ['SENDGRID_APIKEY'])
+            # sg.set_sendgrid_data_residency("eu")
             # uncomment the above line if you are sending mail using a regional EU subuser
             response = sg.send(mail)
-            print(response.status_c)
-            print(response.body)
-            print(response.headers)
+            flash(response.status_code)
+            # flash(response.body)
+            # flash(response.headers)
         except Exception as e:
-            print(e.message)
+            flash(f"Email error: {e}")
         except ConnectionError as msg:
             flash(f"{msg}. Try again later!")
-        else:
-            flash("Your message has been sent!")
-            return redirect(url_for('home'))
+        # else:
+        #     flash("Your message has been sent!")
+        #     return redirect(url_for('home'))
     return render_template("index.html")
 
 
