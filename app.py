@@ -41,9 +41,9 @@ def home():
             flash(f"Email error: {e}")
         except ConnectionError as msg:
             flash(f"{msg}. Try again later!")
-        # else:
-        #     flash("Your message has been sent!")
-        #     return redirect(url_for('home'))
+        else:
+            flash("Your message has been sent!")
+            return redirect(url_for('home'))
     return render_template("index.html")
 
 
